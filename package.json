@@ -1,0 +1,16 @@
+{
+  "name": "@a/telex",
+  "type": "module",
+  "scripts": {
+    "build": "wxt build",
+    "clean": "git clean -xdf .cache .output .wxt node_modules",
+    "dev": "wxt dev",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "zip": "wxt zip"
+  },
+  "devDependencies": {
+    "@nut-tree-fork/nut-js": "latest",
+    "wxt": "latest"
+  }
+}
