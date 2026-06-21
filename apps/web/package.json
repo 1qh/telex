@@ -8,7 +8,8 @@
     "build": "next build",
     "copy-zip": "bun run copy-zip.ts",
     "dev": "next dev --turbo",
-    "start": "next start"
+    "start": "next start",
+    "test": "bun test"
   },
   "dependencies": {
     "@a/ui": "workspace:*",
