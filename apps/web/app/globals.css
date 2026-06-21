@@ -1,2 +1,12 @@
+/* biome-ignore-all lint/nursery/noUnusedClasses: .dark (next-themes) + .monaco-* (Monaco runtime DOM) classes are applied at runtime, not referenced in JSX */
 @import '@a/ui/globals.css';
 @source '../../../readonly/ui/src';
+.dark body {
+  background: oklch(0 0 0);
+}
+.dark .monaco-editor,
+.dark .monaco-editor .margin,
+.dark .monaco-editor-background,
+.dark .monaco-editor .overflow-guard {
+  background-color: oklch(0 0 0) !important;
+}
