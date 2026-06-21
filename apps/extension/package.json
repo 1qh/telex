@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "wxt build",
+    "build": "wxt build && wxt zip",
     "dev": "wxt dev",
     "postinstall": "wxt prepare",
     "zip": "wxt zip"

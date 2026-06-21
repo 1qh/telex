@@ -1,0 +1,25 @@
+{
+  "name": "web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "prebuild": "bun run copy-zip.ts",
+    "build": "next build",
+    "dev": "next dev --turbo",
+    "start": "next start",
+    "copy-zip": "bun run copy-zip.ts"
+  },
+  "dependencies": {
+    "@telex/engine": "workspace:*",
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "devDependencies": {
+    "@telex/extension": "workspace:*",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest"
+  }
+}
