@@ -1,0 +1,12 @@
+{
+  "name": "@telex/host",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "setup": "bun src/install.ts"
+  },
+  "dependencies": {
+    "@nut-tree-fork/nut-js": "latest"
+  }
+}

@@ -1,16 +1,35 @@
 {
-  "name": "@a/telex",
-  "type": "module",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
   "scripts": {
-    "build": "wxt build",
-    "clean": "git clean -xdf .cache .output .wxt node_modules",
-    "dev": "wxt dev",
-    "lint": "eslint",
-    "typecheck": "tsc --noEmit",
-    "zip": "wxt zip"
+    "action": "sh up.sh",
+    "build": "turbo build --output-logs=errors-only",
+    "check": "lintmax check",
+    "clean": "sh clean.sh",
+    "fix": "lintmax fix",
+    "postinstall": "sherif",
+    "prepare": "bunx simple-git-hooks"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "sh up.sh && git add -u"
   },
   "devDependencies": {
-    "@nut-tree-fork/nut-js": "latest",
-    "wxt": "latest"
-  }
+    "bun-types": "latest",
+    "lintmax": "latest",
+    "sherif": "latest",
+    "simple-git-hooks": "latest",
+    "tsdown": "latest",
+    "turbo": "latest",
+    "typescript": "latest"
+  },
+  "packageManager": "bun@1.3.14",
+  "trustedDependencies": [
+    "esbuild",
+    "lintmax",
+    "sharp",
+    "simple-git-hooks"
+  ]
 }

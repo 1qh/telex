@@ -1,0 +1,18 @@
+{
+  "name": "@telex/extension",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "wxt build",
+    "dev": "wxt dev",
+    "postinstall": "wxt prepare",
+    "zip": "wxt zip"
+  },
+  "dependencies": {
+    "@telex/engine": "workspace:*"
+  },
+  "devDependencies": {
+    "wxt": "latest"
+  }
+}

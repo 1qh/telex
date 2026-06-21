@@ -1,0 +1,5 @@
+{
+  "extends": "../../tsconfig.json",
+  "include": ["entrypoints/**/*.ts", "wxt.config.ts"],
+  "exclude": [".output", ".wxt", "node_modules"]
+}

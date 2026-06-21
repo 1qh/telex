@@ -7,7 +7,7 @@
 import { browser } from 'wxt/browser'
 import { defineContentScript } from 'wxt/utils/define-content-script'
 
-import type { Engine } from '../engine'
+import type { Engine } from '@telex/engine'
 
 import {
   addMarkToChar,
@@ -18,7 +18,7 @@ import {
   isWordBreakSymbol,
   lower,
   ModeFlags
-} from '../engine'
+} from '@telex/engine'
 
 type Editable = HTMLElement | HTMLInputElement | HTMLTextAreaElement
 interface EditorState {

@@ -4,7 +4,7 @@ import type { Browser } from 'wxt/browser'
 import { browser } from 'wxt/browser'
 import { defineBackground } from 'wxt/utils/define-background'
 
-import { createEngine, isWordBreakSymbol } from '../engine'
+import { createEngine, isWordBreakSymbol } from '@telex/engine'
 
 type ContentMessage = ModeMessage | WorkerKeyMessage | WorkerResetMessage
 type Draw = (ctx: OffscreenCanvasRenderingContext2D, size: number) => void

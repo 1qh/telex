@@ -37,7 +37,7 @@ const HOST_NAME = 'com.telex.vietnamese',
   },
   createWrapperScript = (): string => {
     const os = platform(),
-      indexPath = join(ROOT_DIR, 'host', 'index.ts'),
+      indexPath = join(__dirname, 'index.ts'),
       wrapperPath = getHostPath(),
       bunPath = process.execPath
     if (os === 'win32') writeFileSync(wrapperPath, `@echo off\r\n"${bunPath}" run "${indexPath}"\r\n`)
