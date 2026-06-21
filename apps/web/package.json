@@ -13,6 +13,7 @@
   "dependencies": {
     "@a/ui": "workspace:*",
     "@telex/engine": "workspace:*",
+    "idecn": "0.0.51",
     "lucide-react": "latest",
     "next": "latest",
     "next-themes": "latest",
