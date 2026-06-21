@@ -6,9 +6,9 @@
   "scripts": {
     "prebuild": "bun run copy-zip.ts",
     "build": "next build",
+    "copy-zip": "bun run copy-zip.ts",
     "dev": "next dev --turbo",
-    "start": "next start",
-    "copy-zip": "bun run copy-zip.ts"
+    "start": "next start"
   },
   "dependencies": {
     "@telex/engine": "workspace:*",
@@ -17,9 +17,6 @@
     "react-dom": "latest"
   },
   "devDependencies": {
-    "@telex/extension": "workspace:*",
-    "@types/node": "latest",
-    "@types/react": "latest",
-    "@types/react-dom": "latest"
+    "@telex/extension": "workspace:*"
   }
 }

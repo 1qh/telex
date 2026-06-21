@@ -11,8 +11,5 @@
   },
   "dependencies": {
     "@telex/engine": "workspace:*"
-  },
-  "devDependencies": {
-    "wxt": "latest"
   }
 }

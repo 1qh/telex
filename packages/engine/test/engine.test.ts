@@ -8,24 +8,19 @@ const run = (value: string) => {
   engine.processString(value, 0)
   return engine.getProcessedString()
 }
-
 describe('engine golden (vi-rs corpus)', () => {
-  test(
-    'every case transforms identically, plain + comma-suffixed',
-    async () => {
-      const text = await file(join(import.meta.dir, 'engine.golden.jsonl')).text(),
-        fails: string[] = []
-      for (const line of text.split(/\r?\n/u)) {
-        if (!line) continue
-        const { expected, input } = JSON.parse(line) as { expected: string; input: string },
-          base = run(input)
+  test('every case transforms identically, plain + comma-suffixed', async () => {
+    const text = await file(join(import.meta.dir, 'engine.golden.jsonl')).text()
+    const fails: string[] = []
+    for (const line of text.split(/\r?\n/u))
+      if (line) {
+        const { expected, input } = JSON.parse(line) as { expected: string; input: string }
+        const base = run(input)
         if (base !== expected) fails.push(`base | ${input} -> ${base} | want ${expected}`)
-        const commaInput = `${input},`,
-          commaOut = run(commaInput)
+        const commaInput = `${input},`
+        const commaOut = run(commaInput)
         if (commaOut !== `${expected},`) fails.push(`comma | ${commaInput} -> ${commaOut} | want ${expected},`)
       }
-      expect(fails).toEqual([])
-    },
-    120_000
-  )
+    expect(fails).toEqual([])
+  }, 120_000)
 })

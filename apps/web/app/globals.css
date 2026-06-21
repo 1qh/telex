@@ -1,26 +1,96 @@
+/* biome-ignore-all lint/nursery/noUnusedClasses: every class is consumed via React className in page.tsx, which biome cannot cross-reference */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
-
 :root {
   color-scheme: dark;
-  --bg: #0b0d10;
-  --panel: #14181d;
-  --border: #232a31;
-  --text: #e7edf2;
-  --muted: #8a96a3;
-  --accent: #4cc9f0;
+  --bg: oklch(0.18 0.014 250);
+  --panel: oklch(0.24 0.014 250);
+  --border: oklch(0.32 0.018 250);
+  --text: oklch(0.93 0.012 250);
+  --muted: oklch(0.66 0.025 250);
+  --accent: oklch(0.78 0.13 220);
+  --accent-text: oklch(0.28 0.06 220);
 }
-
 html,
 body {
   height: 100%;
 }
-
 body {
   background: var(--bg);
   color: var(--text);
   font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  height: 100dvh;
+  padding: 1rem;
+}
+.header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+.title {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+.title-muted {
+  color: var(--muted);
+  font-weight: 400;
+}
+.download {
+  background: var(--accent);
+  border-radius: 0.5rem;
+  color: var(--accent-text);
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.5rem 0.9rem;
+  text-decoration: none;
+}
+.panes {
+  display: grid;
+  flex: 1;
+  gap: 0.75rem;
+  grid-template-columns: 1fr 1fr;
+  min-height: 0;
+}
+.pane {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-height: 0;
+}
+.label {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.input {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  color: var(--text);
+  flex: 1;
+  font-family: ui-monospace, monospace;
+  font-size: 1.4rem;
+  line-height: 1.5;
+  outline: none;
+  padding: 1rem;
+  resize: none;
+}
+.output {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  flex: 1;
+  font-size: 1.4rem;
+  line-height: 1.5;
+  overflow: auto;
+  padding: 1rem;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
