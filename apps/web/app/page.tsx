@@ -67,7 +67,15 @@ const Page = () => {
     pendingOpenRef.current = null
     const id = `${VIRTUAL}${doc.id}`
     const item: TreeDataItem = { id, name: firstLine(doc.content, doc.title), path: id }
-    workspaceRef.current?.openFile(item)
+    let tries = 0
+    const tryOpen = () => {
+      const workspace = workspaceRef.current
+      if (!workspace) return
+      workspace.openFile(item)
+      tries += 1
+      if (!workspace.hasPanel(id) && tries < 20) requestAnimationFrame(tryOpen)
+    }
+    requestAnimationFrame(tryOpen)
   }, [docs])
   const fileActions = useMemo<FileActions>(
     () => ({
