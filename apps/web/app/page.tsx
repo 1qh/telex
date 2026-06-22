@@ -43,9 +43,9 @@ const Page = () => {
     setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')
   }
   return (
-    <>
+    <div className='flex h-dvh flex-col'>
       <Workspace
-        className='h-dvh'
+        className='flex-1'
         editable
         files={files}
         inputMethod={telexInputMethod}
@@ -67,7 +67,7 @@ const Page = () => {
           {resolvedTheme === 'dark' ? <Sun /> : <Moon />}
         </button>
       </div>
-    </>
+    </div>
   )
 }
 export default Page
