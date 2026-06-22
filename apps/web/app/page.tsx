@@ -3,48 +3,73 @@
 import type { FileActions, TreeContextAction, VirtualFile, WorkspaceRef } from 'idecn'
 import { buttonVariants } from '@a/ui/button'
 import { Workspace } from 'idecn'
-import { Copy, Download, Moon, Sun, Trash2 } from 'lucide-react'
+import { Copy, Download, FilePlus, Moon, Sun, Trash2 } from 'lucide-react'
 import { useTheme } from 'next-themes'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { telexInputMethod } from './telex-ime'
 
 const VIRTUAL = '__virtual:'
+const STORAGE_KEY = 'telex-docs'
+const noop = (): void => undefined
+const subscribeNoop = (): (() => void) => noop
 const firstLine = (content: string, fallback: string): string =>
   content
     .split('\n')
     .find(line => line.trim().length > 0)
     ?.trim() ?? fallback
-const docTitle = (title: string | undefined, n: number): string => {
-  const trimmed = title?.trim()
-  return trimmed && trimmed.length > 0 ? trimmed : `Untitled ${n}`
-}
 interface Doc {
   content: string
   id: string
-  title: string
+  initialContent: string
+  n: number
 }
-const INITIAL: Doc[] = [
-  { content: '', id: 'doc-1', title: 'Untitled 1' },
-  { content: '', id: 'doc-2', title: 'Untitled 2' },
-  { content: '', id: 'doc-3', title: 'Untitled 3' }
-]
+const fresh = (content: string, id: string, n: number): Doc => ({ content, id, initialContent: content, n })
+const INITIAL: Doc[] = [fresh('', 'doc-1', 1), fresh('', 'doc-2', 2), fresh('', 'doc-3', 3)]
+const isStored = (value: unknown): value is { content: string; id: string; n: number } => {
+  if (typeof value !== 'object' || value === null) return false
+  const record = value as Record<string, unknown>
+  return typeof record.content === 'string' && typeof record.id === 'string' && typeof record.n === 'number'
+}
+const loadDocs = (): Doc[] => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (raw === null) return INITIAL
+    const parsed: unknown = JSON.parse(raw)
+    if (!Array.isArray(parsed)) return INITIAL
+    const docs = parsed.filter(isStored).map(entry => fresh(entry.content, entry.id, entry.n))
+    return docs.length > 0 ? docs : INITIAL
+  } catch {
+    return INITIAL
+  }
+}
 const Page = () => {
-  const counterRef = useRef(INITIAL.length)
-  const [docs, setDocs] = useState<Doc[]>(INITIAL)
-  const { resolvedTheme, setTheme } = useTheme()
-  const workspaceRef = useRef<WorkspaceRef>(null)
-  const docsRef = useRef(docs)
+  const [docs, setDocs] = useState<Doc[]>(loadDocs)
+  const docsRef = useRef<Doc[]>(docs)
   const pendingOpenRef = useRef<null | string>(null)
+  const workspaceRef = useRef<WorkspaceRef>(null)
+  const mounted = useSyncExternalStore(
+    subscribeNoop,
+    () => true,
+    () => false
+  )
+  const { resolvedTheme, setTheme } = useTheme()
   useEffect(() => {
     docsRef.current = docs
+  }, [docs])
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(docs.map(doc => ({ content: doc.content, id: doc.id, n: doc.n }))))
+    } catch {
+      // storage unavailable
+    }
   }, [docs])
   const files = useMemo<VirtualFile[]>(
     () =>
       docs.map((doc, index) => ({
-        content: '',
+        content: doc.initialContent,
         id: doc.id,
         language: 'plaintext',
-        name: firstLine(doc.content, doc.title),
+        name: firstLine(doc.content, `Untitled ${doc.n}`),
         open: index === 0
       })),
     [docs]
@@ -53,24 +78,25 @@ const Page = () => {
     const id = panelId.replace(VIRTUAL, '')
     setDocs(previous => previous.map(doc => (doc.id === id ? { ...doc, content } : doc)))
   }, [])
-  const createDoc = useCallback((title?: string) => {
-    counterRef.current += 1
-    const doc: Doc = { content: '', id: `doc-${counterRef.current}`, title: docTitle(title, counterRef.current) }
-    pendingOpenRef.current = doc.id
-    setDocs(previous => [...previous, doc])
+  const createDoc = useCallback(() => {
+    setDocs(previous => {
+      const n = Math.max(0, ...previous.map(doc => doc.n)) + 1
+      const id = `doc-${n}`
+      pendingOpenRef.current = id
+      return [...previous, fresh('', id, n)]
+    })
   }, [])
   useEffect(() => {
     const pendingId = pendingOpenRef.current
     if (!pendingId) return
-    const doc = docs.find(entry => entry.id === pendingId)
-    if (!doc) return
+    if (!docs.some(doc => doc.id === pendingId)) return
     pendingOpenRef.current = null
-    const panelId = `${VIRTUAL}${doc.id}`
+    const panelId = `${VIRTUAL}${pendingId}`
     let tries = 0
     const tryOpen = () => {
       const workspace = workspaceRef.current
       if (!workspace) return
-      workspace.openVirtual(doc.id)
+      workspace.openVirtual(pendingId)
       tries += 1
       if (!workspace.hasPanel(panelId) && tries < 20) requestAnimationFrame(tryOpen)
     }
@@ -94,19 +120,23 @@ const Page = () => {
             destructive: true,
             icon: Trash2,
             label: 'Delete',
-            onSelect: () => setDocs(previous => previous.filter(entry => entry.id !== id))
+            onSelect: () =>
+              setDocs(previous => {
+                const next = previous.filter(entry => entry.id !== id)
+                return next.length > 0 ? next : previous
+              })
           }
         ]
         return actions
       },
-      copyPath: false,
-      onCreateFile: (_parentPath, name) => createDoc(name)
+      copyPath: false
     }),
-    [createDoc]
+    []
   )
   const toggleTheme = () => {
     setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')
   }
+  if (!mounted) return null
   return (
     <div className='flex h-dvh flex-col'>
       <Workspace
@@ -119,6 +149,13 @@ const Page = () => {
         ref={workspaceRef}
       />
       <div className='fixed right-4 bottom-9 z-50 flex gap-2'>
+        <button
+          aria-label='New doc'
+          className={buttonVariants({ size: 'icon', variant: 'outline' })}
+          onClick={createDoc}
+          type='button'>
+          <FilePlus />
+        </button>
         <a
           aria-label='Download extension'
           className={buttonVariants({ size: 'icon', variant: 'outline' })}
