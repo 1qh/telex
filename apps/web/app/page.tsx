@@ -1,6 +1,6 @@
 'use client'
 /* oxlint-disable promise/prefer-await-to-then */
-import type { FileActions, TreeContextAction, TreeDataItem, VirtualFile, WorkspaceRef } from 'idecn'
+import type { FileActions, TreeContextAction, VirtualFile, WorkspaceRef } from 'idecn'
 import { buttonVariants } from '@a/ui/button'
 import { Workspace } from 'idecn'
 import { Copy, Download, Moon, Sun, Trash2 } from 'lucide-react'
@@ -65,15 +65,14 @@ const Page = () => {
     const doc = docs.find(entry => entry.id === pendingId)
     if (!doc) return
     pendingOpenRef.current = null
-    const id = `${VIRTUAL}${doc.id}`
-    const item: TreeDataItem = { id, name: firstLine(doc.content, doc.title), path: id }
+    const panelId = `${VIRTUAL}${doc.id}`
     let tries = 0
     const tryOpen = () => {
       const workspace = workspaceRef.current
       if (!workspace) return
-      workspace.openFile(item)
+      workspace.openVirtual(doc.id)
       tries += 1
-      if (!workspace.hasPanel(id) && tries < 20) requestAnimationFrame(tryOpen)
+      if (!workspace.hasPanel(panelId) && tries < 20) requestAnimationFrame(tryOpen)
     }
     requestAnimationFrame(tryOpen)
   }, [docs])
