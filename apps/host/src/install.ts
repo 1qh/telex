@@ -39,9 +39,12 @@ const createWrapperScript = (): string => {
   const indexPath = join(scriptDir, 'index.ts')
   const wrapperPath = getHostPath()
   const bunPath = process.execPath
+  // oxlint-disable-next-line node/no-sync
   if (os === 'win32') writeFileSync(wrapperPath, `@echo off\r\n"${bunPath}" run "${indexPath}"\r\n`)
   else {
+    // oxlint-disable-next-line node/no-sync
     writeFileSync(wrapperPath, `#!/bin/bash\nexec "${bunPath}" run "${indexPath}"\n`)
+    // oxlint-disable-next-line node/no-sync
     chmodSync(wrapperPath, 0o755)
   }
   console.log(`Using bun at: ${bunPath}`)
@@ -63,8 +66,10 @@ const install = (extensionId: string): boolean => {
   let installed = false
   for (const location of locations)
     try {
+      // oxlint-disable-next-line node/no-sync
       mkdirSync(location, { recursive: true })
       const manifestPath = join(location, `${HOST_NAME}.json`)
+      // oxlint-disable-next-line node/no-sync
       writeFileSync(manifestPath, JSON.stringify(manifest, null, 2))
       console.log(`Installed: ${manifestPath}`)
       installed = true
@@ -85,8 +90,10 @@ const uninstall = (): boolean => {
   let removed = false
   for (const location of locations) {
     const manifestPath = join(location, `${HOST_NAME}.json`)
+    // oxlint-disable-next-line node/no-sync
     if (existsSync(manifestPath))
       try {
+        // oxlint-disable-next-line node/no-sync
         unlinkSync(manifestPath)
         console.log(`Removed: ${manifestPath}`)
         removed = true

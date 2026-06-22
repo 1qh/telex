@@ -7,4 +7,4 @@ const Providers = ({ children }: { children: ReactNode }) => (
     {children}
   </ThemeProvider>
 )
-export default Providers
+export { Providers }
