@@ -10,6 +10,14 @@ import { telexInputMethod } from './telex-ime'
 
 const VIRTUAL = '__virtual:'
 const STORAGE_KEY = 'telex-docs'
+const ACTIVE_KEY = 'telex-active'
+const loadActive = (): null | string => {
+  try {
+    return localStorage.getItem(ACTIVE_KEY)
+  } catch {
+    return null
+  }
+}
 const noop = (): void => undefined
 const subscribeNoop = (): (() => void) => noop
 const firstLine = (content: string, fallback: string): string =>
@@ -44,6 +52,7 @@ const loadDocs = (): Doc[] => {
 }
 const Page = () => {
   const [docs, setDocs] = useState<Doc[]>(loadDocs)
+  const [activeId, setActiveId] = useState<null | string>(loadActive)
   const docsRef = useRef<Doc[]>(docs)
   const pendingOpenRef = useRef<null | string>(null)
   const workspaceRef = useRef<WorkspaceRef>(null)
@@ -63,20 +72,28 @@ const Page = () => {
       // storage unavailable
     }
   }, [docs])
-  const files = useMemo<VirtualFile[]>(
-    () =>
-      docs.map((doc, index) => ({
-        content: doc.initialContent,
-        id: doc.id,
-        language: 'plaintext',
-        name: firstLine(doc.content, `Untitled ${doc.n}`),
-        open: index === 0
-      })),
-    [docs]
-  )
+  const files = useMemo<VirtualFile[]>(() => {
+    const activeExists = activeId !== null && docs.some(doc => doc.id === activeId)
+    return docs.map((doc, index) => ({
+      content: doc.initialContent,
+      id: doc.id,
+      language: 'plaintext',
+      name: firstLine(doc.content, `Untitled ${doc.n}`),
+      open: activeExists ? doc.id === activeId : index === 0
+    }))
+  }, [activeId, docs])
   const onContentChange = useCallback((panelId: string, content: string) => {
     const id = panelId.replace(VIRTUAL, '')
     setDocs(previous => previous.map(doc => (doc.id === id ? { ...doc, content } : doc)))
+  }, [])
+  const onTabChange = useCallback((panelId: string) => {
+    const id = panelId.replace(VIRTUAL, '')
+    setActiveId(id)
+    try {
+      localStorage.setItem(ACTIVE_KEY, id)
+    } catch {
+      // storage unavailable
+    }
   }, [])
   const createDoc = useCallback(() => {
     setDocs(previous => {
@@ -146,6 +163,7 @@ const Page = () => {
         files={files}
         inputMethod={telexInputMethod}
         onContentChange={onContentChange}
+        onTabChange={onTabChange}
         ref={workspaceRef}
       />
       <div className='fixed right-4 bottom-9 z-50 flex gap-2'>
