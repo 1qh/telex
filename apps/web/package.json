@@ -14,7 +14,7 @@
   "dependencies": {
     "@a/ui": "workspace:*",
     "@telex/engine": "workspace:*",
-    "idecn": "0.0.54",
+    "idecn": "latest",
     "lucide-react": "latest",
     "next": "latest",
     "next-themes": "latest",
