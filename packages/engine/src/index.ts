@@ -1,5 +1,5 @@
 // oxlint-disable no-unreadable-array-destructuring, unicorn/prefer-math-trunc, unicorn/prefer-spread
-/* eslint-disable complexity, no-bitwise */
+/* eslint-disable complexity, no-bitwise, sonarjs/cognitive-complexity -- Vietnamese IME transform engine; the tone/mark placement and key-processing algorithms are inherently branch-dense (same reason cyclomatic complexity is disabled here) */
 /** biome-ignore-all lint/performance/useTopLevelRegex: x */
 /** biome-ignore-all lint/suspicious/noBitwiseOperators: x */
 type AccentStyle = 'new' | 'old'
@@ -12,12 +12,11 @@ type Action =
   | { type: 'reset-u' }
 interface Engine {
   getProcessedString: () => string
-  processKey: (key: string, mode: Mode) => void
-  processString: (text: string, mode: Mode) => void
+  processKey: (key: string, mode: number) => void
+  processString: (text: string, mode: number) => void
   reset: () => void
 }
 type LetterModification = 'breve' | 'circumflex' | 'dyet' | 'horn'
-type Mode = number
 interface Syllable {
   accent: AccentStyle
   final: string
@@ -43,7 +42,7 @@ const singleInitialConsonants = 'bcdđghklmnpqrstvx'
 const digraphInitialConsonants = 'ch|gh|gi|kh|ng|nh|ph|qu|th|tr'.split('|')
 const finalConsonants = 'c|ch|m|n|ng|nh|p|t'.split('|')
 const toneMarks: Record<Tone, string> = { 0: '', 1: '̀', 2: '́', 3: '̉', 4: '̃', 5: '̣' }
-const modRegex = /[̛̂̆]/gu
+const modRegex = /[\u031B\u0302\u0306]/gu
 const modMarks: Record<Exclude<LetterModification, 'dyet'>, string> = { breve: '̆', circumflex: '̂', horn: '̛' }
 const toneType = (tone: Tone) => ({ tone, type: 'tone' as const })
 const modify = (modification: LetterModification) => ({ modification, type: 'modify' as const })
@@ -65,13 +64,19 @@ const lower = (char: string) => char.toLowerCase()
 const isAlpha = (char: string) => (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z')
 const isWordBreakSymbol = (key: string) => punctuationMarks.has(key) || (key >= '0' && key <= '9')
 const cleanChar = (char: string) => {
-  const base = char.normalize('NFD').replaceAll(/[̀-ͯ]/gu, '')
-  return base === 'đ' ? 'd' : base === 'Đ' ? 'D' : base
+  const base = char.normalize('NFD').replaceAll(/[\u0300-\u036F]/gu, '')
+  if (base === 'đ') return 'd'
+  if (base === 'Đ') return 'D'
+  return base
 }
 const cleanString = (value: string) => value.replaceAll(/./gu, cleanChar)
 const cleanVowel = (value: string) => cleanString(value).toLowerCase()
 const isVowel = (char: string) => baseVowels.includes(cleanChar(char))
-const stripTone = (char: string) => char.normalize('NFD').replaceAll(/[̣̀́̃̉]/gu, '').normalize('NFC')
+const stripTone = (char: string) =>
+  char
+    .normalize('NFD')
+    .replaceAll(/[\u0323\u0300\u0301\u0303\u0309]/gu, '')
+    .normalize('NFC')
 const stripMarks = (char: string) => cleanChar(stripTone(char).normalize('NFD').replace(modRegex, '').normalize('NFC'))
 const findToneFromChar = (char: string): Tone => {
   const nfd = char.normalize('NFD')
@@ -109,11 +114,9 @@ const addMarkToChar = (char: string, mark: number) => {
 }
 const isValidInitialConsonant = (consonant: string) => {
   const value = consonant.toLowerCase()
-  return value.length === 1
-    ? singleInitialConsonants.includes(value)
-    : value.length === 2
-      ? digraphInitialConsonants.includes(value)
-      : value === 'ngh'
+  if (value.length === 1) return singleInitialConsonants.includes(value)
+  if (value.length === 2) return digraphInitialConsonants.includes(value)
+  return value === 'ngh'
 }
 const isValidFinalConsonant = (consonant: string) => finalConsonants.includes(consonant.toLowerCase())
 const parseSyllable = (input: string) => {
@@ -370,7 +373,7 @@ const createEngine = (): Engine => {
     }
     return 'Ignored'
   }
-  const processKey = (key: string, mode: Mode) => {
+  const processKey = (key: string, mode: number) => {
     if (key.trim() === '') {
       commit(key)
       return
@@ -449,7 +452,7 @@ const createEngine = (): Engine => {
   return {
     getProcessedString: () => state.buffer + formatSyllable(state.syllable),
     processKey,
-    processString: (text: string, mode: Mode) => {
+    processString: (text: string, mode: number) => {
       for (const ch of text) processKey(ch, mode)
     },
     reset: () => {

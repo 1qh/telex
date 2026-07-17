@@ -32,6 +32,16 @@ interface Doc {
   n: number
 }
 const fresh = (content: string, id: string, n: number): Doc => ({ content, id, initialContent: content, n })
+const removeDocById =
+  (id: string) =>
+  (previous: Doc[]): Doc[] => {
+    const next = previous.filter(entry => entry.id !== id)
+    return next.length > 0 ? next : previous
+  }
+const copyDocText = (docs: Doc[], id: string): void => {
+  const doc = docs.find(entry => entry.id === id)
+  if (doc) navigator.clipboard.writeText(doc.content).catch(() => undefined)
+}
 const INITIAL: Doc[] = [fresh('', 'doc-1', 1), fresh('', 'doc-2', 2), fresh('', 'doc-3', 3)]
 const isStored = (value: unknown): value is { content: string; id: string; n: number } => {
   if (typeof value !== 'object' || value === null) return false
@@ -54,6 +64,8 @@ const Page = () => {
   const [docs, setDocs] = useState<Doc[]>(loadDocs)
   const [activeId, setActiveId] = useState<null | string>(loadActive)
   const docsRef = useRef<Doc[]>(docs)
+  const copyHandler = useCallback((id: string) => () => copyDocText(docsRef.current, id), [])
+  const deleteHandler = useCallback((id: string) => () => setDocs(removeDocById(id)), [])
   const pendingOpenRef = useRef<null | string>(null)
   const workspaceRef = useRef<WorkspaceRef>(null)
   const mounted = useSyncExternalStore(
@@ -128,27 +140,20 @@ const Page = () => {
           {
             icon: Copy,
             label: 'Copy text',
-            onSelect: () => {
-              const doc = docsRef.current.find(entry => entry.id === id)
-              if (doc) navigator.clipboard.writeText(doc.content).catch(() => undefined)
-            }
+            onSelect: copyHandler(id)
           },
           {
             destructive: true,
             icon: Trash2,
             label: 'Delete',
-            onSelect: () =>
-              setDocs(previous => {
-                const next = previous.filter(entry => entry.id !== id)
-                return next.length > 0 ? next : previous
-              })
+            onSelect: deleteHandler(id)
           }
         ]
         return actions
       },
       copyPath: false
     }),
-    []
+    [copyHandler, deleteHandler]
   )
   const toggleTheme = () => {
     setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')

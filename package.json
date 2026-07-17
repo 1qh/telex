@@ -1,5 +1,6 @@
 {
   "private": true,
+  "description": "telex monorepo — real-time translation and messaging engine with browser extension and web host",
   "workspaces": [
     "packages/*",
     "apps/*",
@@ -20,7 +21,7 @@
   },
   "devDependencies": {
     "bun-types": "latest",
-    "lintmax": "latest",
+    "lintmax": "^0.1.82",
     "sherif": "latest",
     "simple-git-hooks": "latest",
     "tsdown": "latest",

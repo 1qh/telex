@@ -127,8 +127,13 @@ const findTextPosition = (root: HTMLElement, index: number) => {
   }
   return walk(root) ?? fallback
 }
+const elementOf = (target: EventTarget | null): Element | null => {
+  if (target instanceof Element) return target
+  if (target instanceof Text) return target.parentElement
+  return null
+}
 const getEditableTarget = (target: EventTarget | null): Editable | null => {
-  const element = target instanceof Element ? target : target instanceof Text ? target.parentElement : null
+  const element = elementOf(target)
   if (!element) return null
   if (element instanceof HTMLTextAreaElement) return element
   if (element instanceof HTMLInputElement) return allowedInputTypes.includes(element.type) ? element : null
@@ -251,6 +256,7 @@ const reportMode = () => {
   if (changedWorker) resetWorkerEngine()
   browser.runtime.sendMessage({ enabled, type: 'mode_update', worker }).catch(() => null)
 }
+// eslint-disable-next-line sonarjs/cognitive-complexity -- keydown dispatcher for the IME: modifier tracking, key routing, and composition edge-cases are inherently branch-dense
 const onKeydown = async (event: KeyboardEvent) => {
   if (event.key === 'Control') {
     if (event.repeat) return

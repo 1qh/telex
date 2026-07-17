@@ -2,6 +2,7 @@
   "name": "@telex/engine",
   "version": "0.0.1",
   "private": true,
+  "description": "telex core translation/messaging engine",
   "license": "MIT",
   "type": "module",
   "exports": {
