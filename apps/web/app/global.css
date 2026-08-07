@@ -1,6 +1,8 @@
 /* biome-ignore-all lint/nursery/noUnusedClasses: .dark (next-themes) + .monaco-* (Monaco runtime DOM) classes are applied at runtime, not referenced in JSX */
 @import '@a/ui/globals.css';
+@import 'idecn/styles.css';
 @source '../../../readonly/ui/src';
+@source '../../../node_modules/idecn/dist';
 .dark body {
   background: oklch(0 0 0);
 }
