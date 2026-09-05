@@ -24,6 +24,7 @@ const pasteText = async (text: string) => {
 const toBytes = (data: Buffer | string): Uint8Array => (typeof data === 'string' ? Buffer.from(data) : data)
 const readChunk = async (stream: NodeJS.ReadableStream, want: number): Promise<null | Uint8Array> =>
   new Promise<null | Uint8Array>(resolve => {
+    // biome-ignore lint/nursery/noUnsafeTypeAssertion: NodeJS ReadableStream.read() is typed any; in byte mode it yields Buffer|string|null
     const immediate = stream.read(want) as Buffer | null | string
     if (immediate !== null) {
       resolve(toBytes(immediate))
@@ -31,6 +32,7 @@ const readChunk = async (stream: NodeJS.ReadableStream, want: number): Promise<n
     }
     const teardown: (() => void)[] = []
     const onReadable = () => {
+      // biome-ignore lint/nursery/noUnsafeTypeAssertion: NodeJS ReadableStream.read() is typed any; in byte mode it yields Buffer|string|null
       const next = stream.read(want) as Buffer | null | string
       if (next !== null) {
         for (const off of teardown) off()
@@ -79,6 +81,7 @@ const readMessage = async (): Promise<null | Record<string, unknown>> => {
   if (messageLength === 0) return null
   const body = await readExact(process.stdin, messageLength)
   if (!body) return null
+  // biome-ignore lint/nursery/noUnsafeTypeAssertion: JSON.parse returns any; the native-messaging frame is a JSON object
   return JSON.parse(new TextDecoder().decode(body)) as Record<string, unknown>
 }
 const sendMessage = (message: Record<string, unknown>) => {
@@ -102,14 +105,14 @@ const simulateTyping = async (deleteCount: number, insertText: string, pasteMode
   }
 }
 const handle = async (message: Record<string, unknown>) => {
-  const action = message.action as string
+  const { action } = message
   if (action === 'ping') {
     sendMessage({ status: 'ok' })
     return
   }
   if (action === 'type') {
-    const deleteCount = (message.deleteCount as number) || 0
-    const insertText = (message.insertText as string) || ''
+    const deleteCount = typeof message.deleteCount === 'number' ? message.deleteCount : 0
+    const insertText = typeof message.insertText === 'string' ? message.insertText : ''
     const pasteMode = Boolean(message.usePaste)
     const success = await simulateTyping(deleteCount, insertText, pasteMode)
     sendMessage({ deleteCount, insertText, status: success ? 'ok' : 'error' })

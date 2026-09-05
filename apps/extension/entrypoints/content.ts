@@ -63,8 +63,8 @@ const getContentEditableState = (root: HTMLElement): null | { caret: number; tex
     text += value
   }
   const walk = (node: Node) => {
-    if (node.nodeType === Node.TEXT_NODE) {
-      const { data } = node as Text
+    if (node instanceof Text) {
+      const { data } = node
       const offset = Math.min(range.startOffset, data.length)
       if (node === range.startContainer) {
         add(data.slice(0, offset))
@@ -107,8 +107,8 @@ const findTextPosition = (root: HTMLElement, index: number) => {
     return null
   }
   const walk = (node: Node): null | { node: Node; offset: number } => {
-    if (node.nodeType === Node.TEXT_NODE) {
-      const { data } = node as Text
+    if (node instanceof Text) {
+      const { data } = node
       const next = pos + data.length
       lastBreak = false
       if (index <= next) return { node, offset: index - pos }

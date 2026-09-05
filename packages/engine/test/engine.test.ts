@@ -14,6 +14,7 @@ describe('engine golden (vi-rs corpus)', () => {
     const fails: string[] = []
     for (const line of text.split(/\r?\n/u))
       if (line) {
+        // biome-ignore lint/nursery/noUnsafeTypeAssertion: JSON.parse returns any; each fixture line is a {expected,input} object
         const { expected, input } = JSON.parse(line) as { expected: string; input: string }
         const base = run(input)
         if (base !== expected) fails.push(`base | ${input} -> ${base} | want ${expected}`)

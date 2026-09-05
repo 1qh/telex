@@ -45,6 +45,7 @@ const copyDocText = (docs: Doc[], id: string): void => {
 const INITIAL: Doc[] = [fresh('', 'doc-1', 1), fresh('', 'doc-2', 2), fresh('', 'doc-3', 3)]
 const isStored = (value: unknown): value is { content: string; id: string; n: number } => {
   if (typeof value !== 'object' || value === null) return false
+  // biome-ignore lint/nursery/noUnsafeTypeAssertion: type guard — value is already object-and-non-null-checked above; reading its fields as unknown
   const record = value as Record<string, unknown>
   return typeof record.content === 'string' && typeof record.id === 'string' && typeof record.n === 'number'
 }

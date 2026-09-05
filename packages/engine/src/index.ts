@@ -333,6 +333,7 @@ const removeTone = (syllable: Syllable): Transformation => {
 const createEngine = (): Engine => {
   const state = {
     buffer: '',
+    // biome-ignore lint/nursery/noUnsafeTypeAssertion: widening the initial null to the mutable Action|null slot (null is assignable to Action|null)
     lastAction: null as Action | null,
     syllable: newSyllable(),
     wHold: 0
